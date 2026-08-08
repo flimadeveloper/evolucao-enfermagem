@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#08192c" />
+  <meta name="description" content="PWA local para rascunho de evolução e cuidados de enfermagem." />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./icon-192.png" />
+  <link rel="apple-touch-icon" href="./icon-192.png" />
+  <link rel="stylesheet" href="./styles.css" />
+  <title>Evolução Enfermagem</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-block">
+        <img src="./icon-192.png" alt="" class="app-icon" />
+        <div>
+          <p class="kicker">ASSISTENTE LOCAL</p>
+          <h1>Evolução Enfermagem</h1>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button id="themeBtn" class="round-btn" type="button" aria-label="Alternar modo claro ou escuro" title="Alternar tema">◐</button>
+        <button id="installBtn" class="round-btn hidden" type="button" aria-label="Instalar aplicativo" title="Instalar aplicativo">↓</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="status-card">
+        <div class="status-left"><span class="online-dot" id="connectionDot"></span><strong id="syncStatus">Offline-ready</strong><span>•</span><span id="todayLabel"></span></div>
+        <span class="status-chip">PWA</span>
+      </section>
+
+      <section class="safety-note">
+        <span class="safety-icon">!</span>
+        <div><strong>Rascunho para revisão profissional.</strong><br><span>O app não define diagnóstico ou conduta; use somente dados avaliados e cuidados selecionados.</span></div>
+      </section>
+
+      <form id="nursingForm" autocomplete="off">
+        <section class="form-grid first-grid">
+          <label class="field-card icon-person">
+            <span class="field-icon">♙</span>
+            <span class="field-content"><span class="field-label">Paciente / referência</span><input id="patient" placeholder="Ex.: RN A / iniciais" /></span>
+          </label>
+          <label class="field-card icon-bed">
+            <span class="field-icon">▰</span>
+            <span class="field-content"><span class="field-label">Leito</span><input id="bed" placeholder="Ex.: Leito 12" /></span>
+          </label>
+        </section>
+
+        <label class="field-card wide-card">
+          <span class="field-icon">⌂</span>
+          <span class="field-content"><span class="field-label">Unidade neonatal</span><select id="unit"><option value="">Não informado</option><option>UTI Neonatal</option><option>UCI Neonatal</option><option>UTINeo</option><option>UCINeo</option></select></span>
+        </label>
+
+        <label class="field-card wide-card">
+          <span class="field-icon">▤</span>
+          <span class="field-content"><span class="field-label">Diagnóstico / motivo da internação</span><input id="diagnosis" placeholder="Descreva somente se conhecido" /></span>
+        </label>
+
+        <section class="details-panel compact-panel">
+          <div class="panel-head"><span>Modelos e sugestões</span><small>Use como rascunho revisável</small></div>
+          <div class="mini-grid two-cols">
+            <label>Modelo por diagnóstico<select id="templateSelect"><option value="">Selecionar modelo</option><option value="prematuridade">Prematuridade</option><option value="sdr">SDR</option><option value="sepse">Sepse neonatal</option><option value="ictericia">Icterícia</option></select></label>
+            <label>Histórico do paciente<select id="historySelect"><option value="">Plantões salvos</option></select></label>
+          </div>
+          <div class="panel-actions">
+            <button class="mini-btn" type="button" id="applyTemplateBtn">Aplicar modelo</button>
+            <button class="mini-btn" type="button" id="loadHistoryBtn">Reaproveitar</button>
+          </div>
+          <label class="custom-care suggestion-box">NANDA/NOC/NIC sugeridos<textarea id="suggestions" rows="5" readonly placeholder="Selecione um modelo ou preencha o diagnóstico para ver sugestões."></textarea></label>
+        </section>
+
+        <section class="form-grid">
+          <button class="summary-card" type="button" data-focus="bp">
+            <span class="field-icon">♡</span>
+            <span><span class="field-label">Sinais vitais</span><strong id="vitalsSummary">Preencher</strong></span>
+            <span class="chev">›</span>
+          </button>
+          <label class="field-card">
+            <span class="field-icon">◉</span>
+            <span class="field-content"><span class="field-label">Ventilação</span><select id="resp"><option value="">Não informado</option><option>Respiração espontânea em ar ambiente</option><option>Em oxigenoterapia</option><option>Em CPAP/VNI</option><option>Em ventilação mecânica invasiva</option></select></span>
+          </label>
+        </section>
+
+        <section class="details-panel" id="vitalsPanel">
+          <div class="panel-head"><span>Sinais vitais e dor</span><small>Preencha somente o que foi aferido</small></div>
+          <div class="mini-grid">
+            <label>PA<input id="bp" placeholder="120/80 mmHg" /></label>
+            <label>FC<input id="hr" placeholder="82 bpm" /></label>
+            <label>FR<input id="rr" placeholder="18 irpm" /></label>
+            <label>SpO₂<input id="spo2" placeholder="97%" /></label>
+            <label>Temperatura<input id="temp" placeholder="36,5 °C" /></label>
+            <label>Dor<input id="pain" placeholder="0/10" /></label>
+          </div>
+        </section>
+
+        <section class="form-grid">
+          <label class="field-card">
+            <span class="field-icon">⌁</span>
+            <span class="field-content"><span class="field-label">Acessos</span><input id="devices" placeholder="AVP, PICC, CVC..." /></span>
+          </label>
+          <label class="field-card">
+            <span class="field-icon">⋔</span>
+            <span class="field-content"><span class="field-label">Dieta</span><select id="diet"><option value="">Não informado</option><option>Dieta via oral</option><option>Dieta por sonda</option><option>Jejum</option><option>Nutrição parenteral</option></select></span>
+          </label>
+          <label class="field-card">
+            <span class="field-icon">◌</span>
+            <span class="field-content"><span class="field-label">Diurese</span><select id="urine"><option value="">Não informado</option><option>Diurese espontânea presente</option><option>Diurese por dispositivo urinário</option><option>Diurese reduzida, conforme observação</option></select></span>
+          </label>
+          <label class="field-card">
+            <span class="field-icon">✋</span>
+            <span class="field-content"><span class="field-label">Pele</span><input id="skin" placeholder="Íntegra, lesão, curativo..." /></span>
+          </label>
+        </section>
+
+        <section class="details-panel compact-panel">
+          <div class="panel-head"><span>Dieta neonatal</span><small>Via, tipo, volume e resíduo</small></div>
+          <div class="mini-grid">
+            <label>Via<select id="dietRoute"><option value="">Não informado</option><option>Via oral por copinho</option><option>Via oral por chuca</option><option>SNG</option><option>SOG</option></select></label>
+            <label>Tipo<select id="dietType"><option value="">Não informado</option><option>LHP</option><option>FM75</option><option>Fórmula</option><option>Seio materno</option></select></label>
+            <label>Volume<input id="dietVolume" placeholder="Ex.: 25 ml" /></label>
+            <label>Resíduo gástrico<input id="gastricResidual" placeholder="Ex.: ausente / 2 ml" /></label>
+          </div>
+        </section>
+
+        <section class="details-panel compact-panel">
+          <div class="panel-head"><span>Suporte neonatal</span><small>Ambiente térmico e fototerapia</small></div>
+          <div class="mini-grid">
+            <label>Acomodação<select id="thermalBed"><option value="">Não informado</option><option>Incubadora aquecida</option><option>Berço comum</option></select></label>
+            <label>Fototerapia<select id="phototherapy"><option value="">Não informado</option><option>Em fototerapia</option><option>Sem fototerapia</option></select></label>
+            <label>Fototerapia %<input id="phototherapyPct" placeholder="Ex.: 50%" /></label>
+          </div>
+        </section>
+
+        <section class="details-panel compact-panel">
+          <div class="panel-head"><span>Estado geral</span><small>Avaliação do período</small></div>
+          <div class="mini-grid two-cols">
+            <label>Estado geral<select id="general"><option value="">Não informado</option><option>Bom estado geral</option><option>Regular estado geral</option><option>Estado geral comprometido</option></select></label>
+            <label>Evacuação<select id="bowel"><option value="">Não informado</option><option>Evacuação presente</option><option>Sem evacuação no período</option></select></label>
+            <label>Turno<select id="shift"><option value="">Não informado</option><option>Manhã</option><option>Tarde</option><option>Noite</option></select></label>
+          </div>
+        </section>
+
+        <label class="field-card wide-card textarea-card">
+          <span class="field-icon">△</span>
+          <span class="field-content"><span class="field-label">Intercorrências / observações</span><textarea id="notes" rows="3" placeholder="Ex.: sem intercorrências no período; resposta aos cuidados; achados relevantes..."></textarea></span>
+        </label>
+
+        <section class="details-panel compact-panel">
+          <div class="panel-head"><span>Calculadoras neonatais</span><small>Conferir sempre com protocolo</small></div>
+          <div class="mini-grid">
+            <label>IG ao nascer (semanas)<input id="gestAgeWeeks" inputmode="decimal" placeholder="Ex.: 32" /></label>
+            <label>Nascimento<input id="birthDate" type="date" /></label>
+            <label>Referência<input id="refDate" type="date" /></label>
+            <label>Peso (kg)<input id="calcWeight" inputmode="decimal" placeholder="Ex.: 1,650" /></label>
+            <label>Dieta por oferta (ml)<input id="feedMl" inputmode="decimal" placeholder="Ex.: 25" /></label>
+            <label>Ofertas/dia<input id="feedsDay" inputmode="numeric" placeholder="Ex.: 8" /></label>
+            <label>Entradas (ml)<input id="intakeMl" inputmode="decimal" placeholder="24h" /></label>
+            <label>Saídas (ml)<input id="outputMl" inputmode="decimal" placeholder="24h" /></label>
+            <label>Dose prescrita (mg/kg)<input id="doseMgKg" inputmode="decimal" placeholder="Ex.: 10" /></label>
+            <label>Volume (ml)<input id="dripVolume" inputmode="decimal" placeholder="Ex.: 100" /></label>
+            <label>Tempo (h)<input id="dripHours" inputmode="decimal" placeholder="Ex.: 4" /></label>
+            <label>Fator gotas<input id="dropFactor" inputmode="numeric" placeholder="20 ou 60" /></label>
+          </div>
+          <div class="calc-results" id="calcResults">Preencha os dados para calcular.</div>
+        </section>
+
+        <section class="care-panel">
+          <div class="panel-head"><span>Cuidados aplicáveis</span><small>Selecione apenas os que se aplicam</small></div>
+          <div class="care-chips" id="careChecks">
+            <label><input type="checkbox" value="Monitorar sinais vitais conforme rotina e condição clínica." /><span>Monitorar sinais vitais</span></label>
+            <label><input type="checkbox" value="Avaliar dor e registrar resposta às medidas instituídas." /><span>Avaliar dor</span></label>
+            <label><input type="checkbox" value="Manter medidas de prevenção de lesão por pressão conforme avaliação de risco." /><span>Prevenção de LPP</span></label>
+            <label><input type="checkbox" value="Realizar mudança de decúbito conforme necessidade clínica e protocolo institucional." /><span>Mudança de decúbito</span></label>
+            <label><input type="checkbox" value="Manter cuidados com acessos e dispositivos, observando sinais de complicação." /><span>Cuidados com acessos</span></label>
+            <label><input type="checkbox" value="Controlar e registrar eliminações e balanço hídrico quando indicado." /><span>Eliminações / balanço</span></label>
+            <label><input type="checkbox" value="Manter cuidados de higiene e conforto conforme necessidade." /><span>Higiene e conforto</span></label>
+            <label><input type="checkbox" value="Administrar medicamentos somente conforme prescrição válida, realizando as checagens de segurança aplicáveis." /><span>Medicações prescritas</span></label>
+          </div>
+          <label class="custom-care">Outros cuidados<textarea id="customCare" rows="2" placeholder="Um cuidado por linha"></textarea></label>
+        </section>
+
+        <div class="action-grid">
+          <button class="action-btn primary-action" type="submit" data-mode="evolution"><span>▧</span>Gerar evolução</button>
+          <button class="action-btn secondary-action" type="submit" data-mode="prescription"><span>✚</span>Gerar prescrição</button>
+          <button class="action-btn save-action" id="saveHistoryBtn" type="button"><span>▣</span>Salvar plantão</button>
+        </div>
+      </form>
+
+      <section id="resultSection" class="preview-card hidden" aria-live="polite">
+        <div class="preview-head">
+          <div><span class="preview-icon">◉</span><strong>Pré-visualização</strong></div>
+          <span class="generated-badge">Gerado agora</span>
+        </div>
+
+        <div class="result-tabs" role="tablist">
+          <button type="button" class="result-tab active" data-result="evolution">Evolução</button>
+          <button type="button" class="result-tab" data-result="prescription">Prescrição</button>
+        </div>
+
+        <div class="result-view active" id="evolutionView">
+          <textarea id="evolution" rows="12" spellcheck="true"></textarea>
+          <button class="copy-btn" data-target="evolution" type="button">Copiar evolução</button>
+        </div>
+        <div class="result-view" id="prescriptionView">
+          <textarea id="prescription" rows="12" spellcheck="true"></textarea>
+          <button class="copy-btn" data-target="prescription" type="button">Copiar prescrição</button>
+        </div>
+        <p class="privacy">Os dados permanecem neste navegador. Este protótipo não possui backend e não envia o formulário para servidor.</p>
+      </section>
+
+      <div class="spacer"></div>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Navegação principal">
+      <button class="nav-item active" type="button" data-scroll="top"><span>⌂</span><small>Início</small></button>
+      <button class="nav-item" type="button" data-scroll="result"><span>▤</span><small>Evolução</small></button>
+      <button class="nav-item" type="button" data-scroll="result-prescription"><span>✚</span><small>Prescrição</small></button>
+      <button class="nav-item" id="clearBtn" type="button"><span>⋯</span><small>Limpar</small></button>
+    </nav>
+  </div>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="./app.js" defer></script>
+</body>
+</html>

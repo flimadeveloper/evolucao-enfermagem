@@ -1,0 +1,16 @@
+{
+  "name": "Evolução Enfermagem",
+  "short_name": "Evolução",
+  "description": "Assistente local para rascunho de evolução e cuidados de enfermagem.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#061426",
+  "theme_color": "#08192c",
+  "lang": "pt-BR",
+  "icons": [
+    {"src":"./icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"./icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ]
+}
